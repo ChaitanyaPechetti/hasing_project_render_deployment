@@ -14,6 +14,13 @@ from pathlib import Path
 import environ
 import os
 
+import cloudinary
+import cloudinary.uploader
+
+
+
+
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -32,7 +39,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['hasing-project-render-deployment.onrender.com','localhost:8000'] # * -> allowed any host
+ALLOWED_HOSTS = ['hasing-project-render-deployment.onrender.com','127.0.0.1','localhost'] # * -> allowed any host
 
 
 # Application definition
@@ -44,7 +51,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'hashapp'
+    'hashapp',
+    'cloudinary',
+    'cloudinary_storage'
 ]
 
 MIDDLEWARE = [
@@ -132,3 +141,15 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Configuration       
+cloudinary.config( 
+    cloud_name = env('C_CN'), 
+    api_key = env('C_AK'), 
+    api_secret = env('C_AS'),
+    secure=True
+)
+
+default_file_storage='cloudinary_storage.storage.MediaCloudinaryStorage'
+

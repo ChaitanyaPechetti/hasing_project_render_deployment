@@ -1,4 +1,5 @@
 import json
+import cloudinary
 from django.shortcuts import render
 from django.http import JsonResponse
 from .serializers import user_serializer
@@ -11,6 +12,9 @@ import datetime
 from django.conf import settings
 SECRET_KEY = settings.SECRET_KEY
 # Create your views here.
+
+
+
 
 def home_page(request):
     # return JsonResponse({'status':200})
@@ -27,7 +31,7 @@ def home_page(request):
         print(user_info)
         
     except Exception as e:
-          return JsonResponse({'error':"user failed"})
+        return JsonResponse({'error':"user failed"})
     
     loc = user_info['location']
       
@@ -49,7 +53,8 @@ def register(request):
         # salt = bcrypt.gensalt(rounds=12)
         # hashed_passowrd = bcrypt.hashpw(received_password,salt)
         hashed_password = password_hash(u1.validated_data['password'])
-        u1.validated_data['password'] = hashed_password.decode('utf-8')
+        # u1.validated_data['password'] = hashed_password .decode('utf-8')
+        u1.validated_data['password'] = hashed_password #.decode('utf-8')
         # u1.validated_data['password'] = 'abc'
         
         # s=serializer_data.get('password')
@@ -106,7 +111,7 @@ def login(request):
             'iat':datetime.datetime.now(datetime.timezone.utc)
         }
         
-        token = jwt.encode(data,SECRET_KEY,algorithm='HS256')
+        token = jwt.encode(data, SECRET_KEY, algorithm='HS256')
         
         response=JsonResponse({'status':200,'user_token':token})
         # request.session['username'] =u1.username
@@ -134,6 +139,38 @@ def update(request):
         return JsonResponse({'status':'password changed'})
     else:
         return JsonResponse(u1.errors)
+    
+    
+@csrf_exempt
+def upload_image(request):
+    #username
+    #password
+    # print(request.FILES)
+    # upload_file = request.FILES['resume']
+    # image_details=cloudinary.uploader.upload(upload_file,folder='profile_pictures')
+    # # print(image_details)
+    # print(image_details.get('secure_url'))
+    # return JsonResponse({})
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+    if request.FILES.get('profile_picture'):
+        profile_picture = request.FILES.get('profile_picture')
+        print('profile picture included')
+        image_details = cloudinary.uploader.upload(profile_picture,folder='user_profiles')
+        print(image_details.get('secure_url'))
+    data = {
+        'username':username,
+        'password':password,
+        'profile_picture':image_details.get('secure_url')
+    }
+    u1=user_serializer(data=data)
+    if u1.is_valid():
+        u1.save()
+        return JsonResponse({'status':'usercreate'})
+    return JsonResponse({'status':'failed'})
+   
+# actually we are storing url not image and redirect it to
+    
         
     
     
